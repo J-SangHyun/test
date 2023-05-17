@@ -8,7 +8,7 @@ let height = 0;
 let vertical = false;
 
 const BOARD_SIZE = 7;
-const board = Array.from(Array(BOARD_SIZE), () => Array(BOARD_SIZE).fill(0))
+const board = Array.from(Array(BOARD_SIZE), () => Array(BOARD_SIZE).fill(0));
 const rects = Array.from(Array(BOARD_SIZE), () => Array(BOARD_SIZE));
 const pieces = Array.from(Array(BOARD_SIZE), () => Array(BOARD_SIZE));
 
