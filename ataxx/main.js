@@ -98,9 +98,7 @@ function movePiece(i1, j1, i2, j2, d) {
       }
     }
   }
-  if(isEnd()) {
-    winner = 
-  }
+  
   
   toggled = false;
   player = 3 - player;
