@@ -1,5 +1,5 @@
-import { render_all } from './render.js';
-import { init_game } from './game.js';
+import { renderAll } from './render.js';
+import { initGame } from './game.js';
 
 export const app = new PIXI.Application({
   resolution: window.devicePixelRatio,
@@ -8,14 +8,14 @@ export const app = new PIXI.Application({
 });
 
 function resize() {
-  render_all();
+  renderAll();
 }
 
 async function init() {
   document.body.appendChild(app.view);
   window.addEventListener('resize', resize);
-  init_game();
-  render_all();
+  initGame();
+  renderAll();
 }
 
 init();

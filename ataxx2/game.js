@@ -1,22 +1,23 @@
-export const BOARD_SIZE = 7;
+export const boardSize = 7;
 
-export const board = Array.from(Array(BOARD_SIZE), () => Array(BOARD_SIZE).fill(0));
-export const score = [2, 2];
+export const board = Array.from(Array(boardSize), () => Array(boardSize).fill(0));
+export const score = [0, 2, 2];
 export let toggle = undefined;
 export let turn = 1;
 
-export function init_game() {
+export function initGame() {
   // init board
-  for(let x = 0; x < BOARD_SIZE; x++) {
-    for(let y = 0; y < BOARD_SIZE; y++) {
+  for(let x = 0; x < boardSize; x++) {
+    for(let y = 0; y < boardSize; y++) {
       board[x][y] = 0;
     }
   }
-  board[0][0] = board[BOARD_SIZE-1][BOARD_SIZE-1] = 1;
-  board[0][BOARD_SIZE-1] = board[BOARD_SIZE-1][0] = 2;
+  board[0][0] = board[boardSize-1][boardSize-1] = 1;
+  board[0][boardSize-1] = board[boardSize-1][0] = 2;
 
   // init others
-  score = [2, 2];
+  score[1] = 2;
+  score[2] = 2;
   toggle = undefined;
   turn = 1;
 }
