@@ -22,4 +22,21 @@ export function initGame() {
   turn = 1;
 }
 
+export function clickBlock(i, j) {
+  if(toggle == undefined) {
+    toggle = [i, j];
+  }
+  else {
+    const {x, y} = toggle;
+
+
+
+    toggle = undefined;
+  }
+}
+
+function distance(x1, y1, x2, y2) {
+  return Math.max(x1 - x2, x2 - x1, y1 - y2, y2 - y1);
+}
+
 
