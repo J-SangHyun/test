@@ -1,4 +1,4 @@
-import { renderAll } from './render.js';
+import { renderAll, renderToggle } from './render.js';
 import { initGame } from './game.js';
 
 export const app = new PIXI.Application({
@@ -6,12 +6,12 @@ export const app = new PIXI.Application({
   resizeTo: window
 });
 
-function loadResources() {
-  app.Assets
-    .add('./assets/character1.png')
-    .add('./assets/character2.png')
-    .add('./assets/toggle.png')
-    .load();
+export let char1Texture, char2Texture, toggleTexture;
+
+function loadTextures() {
+  char1Texture = PIXI.Texture.from('./assets/character1.png')
+  char2Texture = PIXI.Texture.from('./assets/character2.png')
+  toggleTexture = PIXI.Texture.from('./assets/toggle.png')
 }
 
 function resize() {
@@ -19,11 +19,15 @@ function resize() {
 }
 
 async function init() {
-  loadResources();
+  loadTextures();
   document.body.appendChild(app.view);
   window.addEventListener('resize', resize);
   initGame();
   renderAll();
+
+  app.ticker.add((delta) => {
+    renderToggle(delta);
+  });  
 }
 
 init();

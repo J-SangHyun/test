@@ -1,3 +1,5 @@
+import { renderAction, renderToggleBlock } from './render.js';
+
 export const boardSize = 7;
 
 export const board = Array.from(Array(boardSize), () => Array(boardSize).fill(0));
@@ -23,20 +25,36 @@ export function initGame() {
 }
 
 export function clickBlock(i, j) {
-  if(toggle == undefined) {
+  if(board[i][j] == turn) {
     toggle = [i, j];
+    renderToggleBlock();
   }
-  else {
-    const {x, y} = toggle;
-
-
-
-    toggle = undefined;
+  else if(board[i][j] == 0 && toggle != undefined) {
+    const x = toggle[0];
+    const y = toggle[1];
+    const d = distance(x, y, i, j);
+    if(d <= 2) {
+      action(x, y, i, j, d);
+      toggle = undefined;
+    }
   }
 }
 
-function distance(x1, y1, x2, y2) {
+export function distance(x1, y1, x2, y2) {
   return Math.max(x1 - x2, x2 - x1, y1 - y2, y2 - y1);
 }
 
+function action(x, y, i, j, d) {
+  if(d == 1) {
+    // copy
+    board[i][j] = turn;
+  }
+  else if (d == 2) {
+    // move
+    board[x][y] = 0;
+    board[i][j] = turn;
+  }
+  renderAction(x, y, i, j, d, turn);
+  turn = 3 - turn;
+}
 
