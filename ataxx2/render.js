@@ -13,7 +13,7 @@ let pieceSize = 0;
 let xPad = 0;
 let yPad = 0;
 let piecePad = 0;
-const toggleColor = [[0xF599A4, 0xFBD9DD], [0x9EC5D5, 0xD4E5EC]];
+const toggleColor = [[0xF599A4, 0xFBD9DD], [0x8EBCCE, 0xD4E5EC]];
 
 export function renderAll() {
   removeAll();
@@ -114,8 +114,8 @@ export function renderToggle(delta) {
     const y = toggle[1];
     toggleSprite.x = xPad + x * blockSize + Math.floor(blockSize / 2);
     toggleSprite.y = yPad + y * blockSize + Math.floor(blockSize / 2);
-    toggleSprite.width = blockSize;
-    toggleSprite.height = blockSize;
+    toggleSprite.width = Math.floor(95 * blockSize / 100);
+    toggleSprite.height = Math.floor(95 * blockSize / 100);
     toggleSprite.anchor.set(0.5);
     toggleSprite.rotation += 0.02 * delta;
     toggleSprite.visible = true;
