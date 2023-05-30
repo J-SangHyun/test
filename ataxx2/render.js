@@ -13,7 +13,7 @@ let pieceSize = 0;
 let xPad = 0;
 let yPad = 0;
 let piecePad = 0;
-const toggleColor = [[0x111111, 0xFBD9DD], [0x111111, 0xFBD9DD]];
+const toggleColor = [[0xF599A4, 0xFBD9DD], [0x9EC5D5, 0xD4E5EC]];
 
 export function renderAll() {
   removeAll();
