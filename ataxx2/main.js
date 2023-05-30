@@ -2,10 +2,11 @@ import { renderAll, renderToggle } from './render.js';
 import { initGame } from './game.js';
 
 export const app = new PIXI.Application({
-  backgroundColor: 0xFFFFFF,
-  resizeTo: window
+  resolution: window.devicePixelRatio,
+  backgroundColor: 0xFFFFFF
 });
 
+export let width, height;
 export let char1Texture, char2Texture, toggleTexture;
 
 function loadTextures() {
@@ -15,6 +16,12 @@ function loadTextures() {
 }
 
 function resize() {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  app.renderer.view.style.width = `${width}px`;
+  app.renderer.view.style.height = `${height}px`;
+  window.scrollTo(0, 0);
+  app.renderer.resize(width, height);
   renderAll();
 }
 
@@ -23,7 +30,7 @@ async function init() {
   document.body.appendChild(app.view);
   window.addEventListener('resize', resize);
   initGame();
-  renderAll();
+  resize();
 
   app.ticker.add((delta) => {
     renderToggle(delta);

@@ -1,8 +1,6 @@
-import { app, char1Texture, char2Texture, toggleTexture } from './main.js';
+import { app, width, height, char1Texture, char2Texture, toggleTexture } from './main.js';
 import { boardSize, board, toggle, score, clickBlock, distance } from './game.js';
 
-let width = 0;
-let height = 0;
 let portrait = true;
 let scoreMargin = 0;
 let boardRenderSize = 0;
@@ -32,8 +30,6 @@ function removeAll() {
 }
 
 function calcRenderVariables() {
-  width = app.renderer.width;
-  height = app.renderer.height;
   portrait = height >= width;
   scoreMargin = Math.max(Math.floor(Math.max(width, height) / 8), Math.floor(Math.abs((width - height) / 2)));
   boardRenderSize = Math.max(width, height) - 2 * scoreMargin;
