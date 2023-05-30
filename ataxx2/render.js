@@ -1,22 +1,24 @@
 import { app, width, height, char1Texture, char2Texture, toggleTexture } from './main.js';
-import { boardSize, board, toggle, score, clickBlock, distance } from './game.js';
+import { boardSize, board, toggle, score, clickBlock, distance, turn } from './game.js';
 
 let portrait = true;
 let scoreMargin = 0;
 let boardRenderSize = 0;
 let boardBlocks = Array.from(Array(boardSize), () => Array(boardSize));
 let boardPieces = Array.from(Array(boardSize), () => Array(boardSize));
+let boardToggle = Array.from(Array(boardSize), () => Array(boardSize).fill(undefined));
 let toggleSprite = undefined;
 let blockSize = 0;
 let pieceSize = 0;
 let xPad = 0;
 let yPad = 0;
 let piecePad = 0;
-
+const toggleColor = [[0x111111, 0xFBD9DD], [0x111111, 0xFBD9DD]];
 
 export function renderAll() {
   removeAll();
   calcRenderVariables();
+  renderTurn();
   renderBoard();
   renderToggleBlock();
 }
@@ -82,7 +84,7 @@ function renderBoard() {
   }
 }
 
-export function renderAction(x, y, i, j, d, turn) {
+export function renderAction(x, y, i, j, d) {
   const newPiece = new PIXI.Sprite(turn == 1 ? char1Texture : char2Texture);
   newPiece.width = pieceSize;
   newPiece.height = pieceSize;
@@ -136,17 +138,28 @@ export function renderToggleBlock() {
         }
         const newBlock = new PIXI.Graphics();
         newBlock.lineStyle({width: 4, color: 0x000000, alpha: 1});
-        newBlock.beginFill(d == 1 ? 0xFFFFFF : 0xFBD9DD);
+        newBlock.beginFill(toggleColor[turn-1][d-1]);
         newBlock.drawRect(0, 0, blockSize, blockSize);
         newBlock.endFill();
         newBlock.x = xPad + (x + i) * blockSize;
         newBlock.y = yPad + (y + j) * blockSize;
-        newBlock.eventMode = 'static';
-        newBlock.on('pointerdown', (event) => { clickBlock(x+i, y+j); });
-        app.stage.removeChild(boardPieces[x+i][y+j]);
-        delete boardPieces[x+i][y+j];
         app.stage.addChild(newBlock);
-        boardBlocks[x+i][y+j] = newBlock;
+        boardToggle[x+i][y+j] = newBlock;
+      }
+    }
+  }
+}
+
+export function renderUnToggle(x, y) {
+  for(let i = -2; i < 3; i++) {
+    for(let j = -2; j < 3; j++) {
+      if(x + i < 0 || x + i >= boardSize || y + j < 0 || y + j >= boardSize) {
+        continue;
+      }
+      if(boardToggle[x+i][y+j] != undefined) {
+        app.stage.removeChild(boardToggle[x+i][y+j]);
+        delete boardToggle[x+i][y+j];
+        boardToggle[x+i][y+j] = undefined;
       }
     }
   }
