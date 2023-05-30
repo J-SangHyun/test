@@ -61,6 +61,10 @@ function action(x, y, i, j, d) {
     board[i][j] = turn;
   }
   renderAction(x, y, i, j, d);
+  isGameEnd();
   turn = 3 - turn;
 }
 
+function isGameEnd() {
+
+}
