@@ -4,8 +4,8 @@ import { boardSize, board, toggle, score, clickBlock, distance, turn } from './g
 let portrait = true;
 let scoreMargin = 0;
 let boardRenderSize = 0;
-let boardBlocks = Array.from(Array(boardSize), () => Array(boardSize));
-let boardPieces = Array.from(Array(boardSize), () => Array(boardSize));
+let boardBlocks = Array.from(Array(boardSize), () => Array(boardSize).fill(undefined));
+let boardPieces = Array.from(Array(boardSize), () => Array(boardSize).fill(undefined));
 let boardToggle = Array.from(Array(boardSize), () => Array(boardSize).fill(undefined));
 let toggleSprite = undefined;
 let blockSize = 0;
@@ -14,6 +14,9 @@ let xPad = 0;
 let yPad = 0;
 let piecePad = 0;
 const toggleColor = [[0xF599A4, 0xFBD9DD], [0x8EBCCE, 0xD4E5EC]];
+let score1;
+let score2;
+
 
 export function renderAll() {
   removeAll();
@@ -21,6 +24,22 @@ export function renderAll() {
   renderTurn();
   renderBoard();
   renderToggleBlock();
+  score1 = new PIXI.Text(String(score[1]));
+  score2 = new PIXI.Text(String(score[2]));
+  score1.x = portrait ? width / 2 : scoreMargin / 2;
+  score1.y = portrait ? scoreMargin / 2 : height / 2;
+  score2.x = portrait ? width / 2 : width - scoreMargin / 2;
+  score2.y = portrait ? height - scoreMargin / 2 : height / 2;
+  app.stage.addChild(score1);
+  app.stage.addChild(score2);
+  renderScore();
+}
+
+export function initRender() {
+  boardBlocks = Array.from(Array(boardSize), () => Array(boardSize).fill(undefined));
+  boardPieces = Array.from(Array(boardSize), () => Array(boardSize).fill(undefined));
+  boardToggle = Array.from(Array(boardSize), () => Array(boardSize).fill(undefined));
+  toggleSprite = undefined;
 }
 
 function removeAll() {
@@ -96,6 +115,14 @@ export function renderAction(x, y, i, j, d) {
     app.stage.removeChild(boardPieces[x][y]);
     delete boardPieces[x][y];
   }
+
+  for(let k = Math.max(0, i-1); k < Math.min(boardSize, i+2); k++) {
+    for(let l = Math.max(0, j-1); l < Math.min(boardSize, j+2); l++) {
+      if(boardPieces[k][l] != undefined) {
+        boardPieces[k][l].texture = turn == 1 ? char1Texture : char2Texture;
+      }
+    }
+  }
 }
 
 export function renderToggle(delta) {
@@ -165,7 +192,24 @@ export function renderUnToggle(x, y) {
   }
 }
 
+export function renderEnd() {
+  for(let i = 0; i < boardSize; i++) {
+    for(let j = 0; j < boardSize; j++) {
+      if(boardPieces[i][j] == undefined) {
+        const newPiece = new PIXI.Sprite(turn == 1 ? char1Texture : char2Texture);
+        newPiece.width = pieceSize;
+        newPiece.height = pieceSize;
+        newPiece.x = xPad + i * blockSize + piecePad;
+        newPiece.y = yPad + j * blockSize + piecePad;
+        app.stage.addChild(newPiece);
+        boardPieces[i][j] = newPiece;
+      }
+    }
+  }
+}
 
-function renderScore() {
 
+export function renderScore() {
+  score1.text = String(score[1]);
+  score2.text = String(score[2]);
 }

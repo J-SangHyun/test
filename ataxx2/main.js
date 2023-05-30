@@ -1,4 +1,4 @@
-import { renderAll, renderToggle } from './render.js';
+import { initRender, renderAll, renderToggle } from './render.js';
 import { initGame } from './game.js';
 
 export const app = new PIXI.Application({
@@ -30,6 +30,7 @@ async function init() {
   document.body.appendChild(app.view);
   window.addEventListener('resize', resize);
   initGame();
+  initRender();
   resize();
 
   app.ticker.add((delta) => {
