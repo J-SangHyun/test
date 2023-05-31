@@ -1,4 +1,4 @@
-import { renderAction, renderToggleBlock, renderUnToggle, renderEnd, renderScore } from './render.js';
+import { renderAction, renderToggleBlock, renderUnToggle, renderEnd, renderScore, renderTurn } from './render.js';
 
 export const boardSize = 7;
 
@@ -73,6 +73,7 @@ function action(x, y, i, j, d) {
   updateScore();
   renderScore();
   turn = 3 - turn;
+  renderTurn();
 }
 
 function isGameEnd() {

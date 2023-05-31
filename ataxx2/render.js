@@ -16,20 +16,41 @@ let piecePad = 0;
 const toggleColor = [[0xF599A4, 0xFBD9DD], [0x8EBCCE, 0xD4E5EC]];
 let score1;
 let score2;
-
+let turn1;
+let turn2;
 
 export function renderAll() {
   removeAll();
   calcRenderVariables();
+
+  turn1 = new PIXI.Graphics();
+  turn2 = new PIXI.Graphics();
+
+  turn1.lineStyle({width: 0});
+  turn1.beginFill(0xF599A4);
+  turn1.drawRect(0, 0, portrait ? width : width / 2, portrait ? height / 2 : height);
+  turn1.endFill();
+  turn1.x = 0;
+  turn1.y = portrait ? height / 2 : 0;
+
+  turn2.lineStyle({width: 0});
+  turn2.beginFill(0x8EBCCE);
+  turn2.drawRect(0, 0, portrait ? width : width / 2, portrait ? height / 2 : height);
+  turn2.endFill();
+  turn2.x = portrait ? 0 : width / 2;
+  turn2.y = 0;
+
+  app.stage.addChild(turn1);
+  app.stage.addChild(turn2);
   renderTurn();
   renderBoard();
   renderToggleBlock();
   score1 = new PIXI.Text(String(score[1]));
   score2 = new PIXI.Text(String(score[2]));
-  score1.x = portrait ? width / 2 : scoreMargin / 2;
-  score1.y = portrait ? scoreMargin / 2 : height / 2;
-  score2.x = portrait ? width / 2 : width - scoreMargin / 2;
-  score2.y = portrait ? height - scoreMargin / 2 : height / 2;
+  score1.x = portrait ? width / 2 : width - scoreMargin / 2;
+  score1.y = portrait ? height - scoreMargin / 2 : height / 2;
+  score2.x = portrait ? width / 2 : scoreMargin / 2;
+  score2.y = portrait ? scoreMargin / 2 : height / 2;
   app.stage.addChild(score1);
   app.stage.addChild(score2);
   renderScore();
@@ -62,8 +83,9 @@ function calcRenderVariables() {
   piecePad = Math.floor((blockSize - pieceSize) / 2);
 }
 
-function renderTurn() {
-  return;
+export function renderTurn() {
+  turn1.visible = turn == 1;
+  turn2.visible = turn == 2;
 }
 
 function renderBoard() {
