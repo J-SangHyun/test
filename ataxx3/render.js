@@ -1,59 +1,22 @@
-import { app, width, height, char1Texture, char2Texture, toggleTexture } from './main.js';
-import { boardSize, board, toggle, score, clickBlock, distance, turn } from './game.js';
+import { app, width, height } from './main.js';
+import { boardSize, toggleColor } from './config.js';
+import { board, player, toggle, score, clickBlock } from './game.js';
+import { distance } from './utils.js';
 
-let portrait = true;
-let scoreMargin = 0;
-let boardRenderSize = 0;
-let boardBlocks = Array.from(Array(boardSize), () => Array(boardSize).fill(undefined));
-let boardPieces = Array.from(Array(boardSize), () => Array(boardSize).fill(undefined));
-let boardToggle = Array.from(Array(boardSize), () => Array(boardSize).fill(undefined));
-let toggleSprite = undefined;
-let blockSize = 0;
-let pieceSize = 0;
-let xPad = 0;
-let yPad = 0;
-let piecePad = 0;
-const toggleColor = [[0xF599A4, 0xFBD9DD], [0x8EBCCE, 0xD4E5EC]];
-let score1;
-let score2;
-let turn1;
-let turn2;
+let boardBlocks, boardPieces, boardToggle;
+let turnBlocks, scoreBlocks;
 
-export function renderAll() {
-  removeAll();
-  calcRenderVariables();
+let pieceTexture, toggleTexture;
+let toggleSprite;
 
-  turn1 = new PIXI.Graphics();
-  turn2 = new PIXI.Graphics();
+let portrait, scoreMargin, boardRenderSize, blockSize, pieceSize;
+let xPad, yPad;
 
-  turn1.lineStyle({width: 0});
-  turn1.beginFill(0xF599A4);
-  turn1.drawRect(0, 0, portrait ? width : width / 2, portrait ? height / 2 : height);
-  turn1.endFill();
-  turn1.x = 0;
-  turn1.y = portrait ? height / 2 : 0;
 
-  turn2.lineStyle({width: 0});
-  turn2.beginFill(0x8EBCCE);
-  turn2.drawRect(0, 0, portrait ? width : width / 2, portrait ? height / 2 : height);
-  turn2.endFill();
-  turn2.x = portrait ? 0 : width / 2;
-  turn2.y = 0;
-
-  app.stage.addChild(turn1);
-  app.stage.addChild(turn2);
-  renderTurn();
-  renderBoard();
-  renderToggleBlock();
-  score1 = new PIXI.Text(String(score[1]));
-  score2 = new PIXI.Text(String(score[2]));
-  score1.x = portrait ? width / 2 : width - scoreMargin / 2;
-  score1.y = portrait ? height - scoreMargin / 2 : height / 2;
-  score2.x = portrait ? width / 2 : scoreMargin / 2;
-  score2.y = portrait ? scoreMargin / 2 : height / 2;
-  app.stage.addChild(score1);
-  app.stage.addChild(score2);
-  renderScore();
+export function loadTextures() {
+  pieceTexture = [PIXI.Texture.from('./assets/character1.png'),
+                  PIXI.Texture.from('./assets/character2.png')];
+  toggleTexture = PIXI.Texture.from('./assets/toggle.png');
 }
 
 export function initRender() {
@@ -61,31 +24,54 @@ export function initRender() {
   boardPieces = Array.from(Array(boardSize), () => Array(boardSize).fill(undefined));
   boardToggle = Array.from(Array(boardSize), () => Array(boardSize).fill(undefined));
   toggleSprite = undefined;
+  turnBlocks = [undefined, undefined];
+  scoreBlocks = [undefined, undefined];
+}
+
+export function renderAll() {
+  removeAll();
+  initRender();
+  calcRenderVariables();
+  renderTurn();
+  renderBoard();
+  renderPieces();
+  renderToggleBlock();
+  renderScore();
 }
 
 function removeAll() {
   while(app.stage.children.length > 0) {
-    let child = app.stage.getChildAt(0); 
+    let child = app.stage.getChildAt(0);
     app.stage.removeChild(child);
   }
-  toggleSprite = undefined;
 }
 
 function calcRenderVariables() {
   portrait = height >= width;
-  scoreMargin = Math.max(Math.floor(Math.max(width, height) / 8), Math.floor(Math.abs((width - height) / 2)));
+  scoreMargin = Math.max(Math.max(width, height) / 8, Math.abs((width - height) / 2));
   boardRenderSize = Math.max(width, height) - 2 * scoreMargin;
 
-  blockSize = Math.floor(boardRenderSize / (boardSize + 1));
-  pieceSize = Math.floor(blockSize * 8 / 10);
-  xPad = Math.floor(width / 2 - blockSize * boardSize / 2);
-  yPad = Math.floor(height / 2 - blockSize * boardSize / 2);
-  piecePad = Math.floor((blockSize - pieceSize) / 2);
+  blockSize = boardRenderSize / (boardSize + 1);
+  pieceSize = 0.8 * blockSize;
+  xPad = width / 2 - blockSize * boardSize / 2;
+  yPad = height / 2 - blockSize * boardSize / 2;
 }
 
 export function renderTurn() {
-  turn1.visible = turn == 1;
-  turn2.visible = turn == 2;
+  for(let i = 0; i < 2; i++) {
+    if(turnBlocks[i] == undefined) {
+      const turnRect = new PIXI.Graphics();
+      turnRect.lineStyle({width: 0});
+      turnRect.beginFill(toggleColor[i][0]);
+      turnRect.drawRect(0, 0, portrait ? width : width / 2, portrait ? height / 2 : height);
+      turnRect.endFill();
+      turnRect.x = portrait ? 0 : i * width / 2;
+      turnRect.y = portrait ? (1 - i) * height / 2 : 0;
+      app.stage.addChild(turnRect);
+      turnBlocks[i] = turnRect;
+    }
+    turnBlocks[i].visible = (player == i+1);
+  }
 }
 
 function renderBoard() {
@@ -102,46 +88,15 @@ function renderBoard() {
       newBlock.on('pointerdown', (event) => { clickBlock(i, j); });
       app.stage.addChild(newBlock);
       boardBlocks[i][j] = newBlock;
-
-      if(board[i][j] == 1) {
-        const newPiece = new PIXI.Sprite(char1Texture);
-        newPiece.width = pieceSize;
-        newPiece.height = pieceSize;
-        newPiece.x = xPad + i * blockSize + piecePad;
-        newPiece.y = yPad + j * blockSize + piecePad;
-        app.stage.addChild(newPiece);
-        boardPieces[i][j] = newPiece;
-      }
-      else if(board[i][j] == 2) {
-        const newPiece = new PIXI.Sprite(char2Texture);
-        newPiece.width = pieceSize;
-        newPiece.height = pieceSize;
-        newPiece.x = xPad + i * blockSize + piecePad;
-        newPiece.y = yPad + j * blockSize + piecePad;
-        app.stage.addChild(newPiece);
-        boardPieces[i][j] = newPiece;
-      }
     }
   }
 }
 
-export function renderAction(x, y, i, j, d) {
-  const newPiece = new PIXI.Sprite(turn == 1 ? char1Texture : char2Texture);
-  newPiece.width = pieceSize;
-  newPiece.height = pieceSize;
-  newPiece.x = xPad + i * blockSize + piecePad;
-  newPiece.y = yPad + j * blockSize + piecePad;
-  app.stage.addChild(newPiece);
-  boardPieces[i][j] = newPiece;
-  if(d == 2) {
-    app.stage.removeChild(boardPieces[x][y]);
-    delete boardPieces[x][y];
-  }
-
-  for(let k = Math.max(0, i-1); k < Math.min(boardSize, i+2); k++) {
-    for(let l = Math.max(0, j-1); l < Math.min(boardSize, j+2); l++) {
-      if(boardPieces[k][l] != undefined) {
-        boardPieces[k][l].texture = turn == 1 ? char1Texture : char2Texture;
+function renderPieces() {
+  for(let i = 0; i < boardSize; i++) {
+    for(let j = 0; j < boardSize; j++) {
+      if(board[i][j] != 0) {
+        addPiece(i, j, board[i][j]);
       }
     }
   }
@@ -150,22 +105,18 @@ export function renderAction(x, y, i, j, d) {
 export function renderToggle(delta) {
   if(toggleSprite == undefined) {
     toggleSprite = new PIXI.Sprite(toggleTexture);
+    toggleSprite.width = 0.95 * blockSize;
+    toggleSprite.height = 0.95 * blockSize;
+    toggleSprite.anchor.set(0.5);
     app.stage.addChild(toggleSprite);
   }
 
   if(toggle == undefined) {
-    if(toggleSprite.visible) {
-      toggleSprite.visible = false;
-    }
+    toggleSprite.visible = false;
   }
   else {
-    const x = toggle[0];
-    const y = toggle[1];
-    toggleSprite.x = xPad + x * blockSize + Math.floor(blockSize / 2);
-    toggleSprite.y = yPad + y * blockSize + Math.floor(blockSize / 2);
-    toggleSprite.width = Math.floor(95 * blockSize / 100);
-    toggleSprite.height = Math.floor(95 * blockSize / 100);
-    toggleSprite.anchor.set(0.5);
+    toggleSprite.x = xPad + toggle[0] * blockSize + blockSize / 2;
+    toggleSprite.y = yPad + toggle[1] * blockSize + blockSize / 2;
     toggleSprite.rotation += 0.02 * delta;
     toggleSprite.visible = true;
   }
@@ -173,65 +124,76 @@ export function renderToggle(delta) {
 
 export function renderToggleBlock() {
   if(toggle != undefined) {
-    const x = toggle[0];
-    const y = toggle[1];
-    let d = 0;
-    for(let i = -2; i < 3; i++) {
-      for(let j = -2; j < 3; j++) {
-        if(x + i < 0 || x + i >= boardSize || y + j < 0 || y + j >= boardSize) {
-          continue;
+    let x, y, d;
+    [x, y] = toggle;
+    for(let i = Math.max(0, x-2); i < Math.min(boardSize, x+3); i++) {
+      for(let j = Math.max(0, y-2); j < Math.min(boardSize, y+3); j++) {
+        d = distance(x, y, i, j);
+        if(board[i][j] == 0 && d != 0) {
+          const newBlock = new PIXI.Graphics();
+          newBlock.lineStyle({width: 4, color: 0x000000, alpha: 1});
+          newBlock.beginFill(toggleColor[player-1][d-1]);
+          newBlock.drawRect(0, 0, blockSize, blockSize);
+          newBlock.endFill();
+          newBlock.x = xPad + i * blockSize;
+          newBlock.y = yPad + j * blockSize;
+          app.stage.addChild(newBlock);
+          boardToggle[i][j] = newBlock;
         }
-        d = distance(x, y, x+i, y+j);
-        if(board[x+i][y+j] != 0 || d == 0 || d > 2) {
-          continue;
-        }
-        const newBlock = new PIXI.Graphics();
-        newBlock.lineStyle({width: 4, color: 0x000000, alpha: 1});
-        newBlock.beginFill(toggleColor[turn-1][d-1]);
-        newBlock.drawRect(0, 0, blockSize, blockSize);
-        newBlock.endFill();
-        newBlock.x = xPad + (x + i) * blockSize;
-        newBlock.y = yPad + (y + j) * blockSize;
-        app.stage.addChild(newBlock);
-        boardToggle[x+i][y+j] = newBlock;
       }
     }
   }
 }
 
-export function renderUnToggle(x, y) {
-  for(let i = -2; i < 3; i++) {
-    for(let j = -2; j < 3; j++) {
-      if(x + i < 0 || x + i >= boardSize || y + j < 0 || y + j >= boardSize) {
-        continue;
-      }
-      if(boardToggle[x+i][y+j] != undefined) {
-        app.stage.removeChild(boardToggle[x+i][y+j]);
-        delete boardToggle[x+i][y+j];
-        boardToggle[x+i][y+j] = undefined;
+export function removeToggleBlock(x, y) {
+  for(let i = Math.max(0, x-2); i < Math.min(boardSize, x+3); i++) {
+    for(let j = Math.max(0, y-2); j < Math.min(boardSize, y+3); j++) {
+      if(boardToggle[i][j] != undefined) {
+        app.stage.removeChild(boardToggle[i][j]);
+        delete boardToggle[i][j];
+        boardToggle[i][j] = undefined;
       }
     }
   }
 }
 
-export function renderEnd() {
-  for(let i = 0; i < boardSize; i++) {
-    for(let j = 0; j < boardSize; j++) {
-      if(boardPieces[i][j] == undefined) {
-        const newPiece = new PIXI.Sprite(turn == 1 ? char1Texture : char2Texture);
-        newPiece.width = pieceSize;
-        newPiece.height = pieceSize;
-        newPiece.x = xPad + i * blockSize + piecePad;
-        newPiece.y = yPad + j * blockSize + piecePad;
-        app.stage.addChild(newPiece);
-        boardPieces[i][j] = newPiece;
-      }
-    }
-  }
+export function addPiece(x, y, turn) {
+  const newPiece = new PIXI.Sprite(pieceTexture[turn-1]);
+  newPiece.width = pieceSize;
+  newPiece.height = pieceSize;
+  newPiece.x = xPad + (x + 0.5) * blockSize;
+  newPiece.y = yPad + (y + 0.5) * blockSize;
+  newPiece.anchor.set(0.5);
+  newPiece.rotation = portrait ? (turn - 1) * Math.PI : (1.5 - turn) * Math.PI;
+  app.stage.addChild(newPiece);
+  boardPieces[x][y] = newPiece;
 }
 
+export function removePiece(x, y) {
+  app.stage.removeChild(boardPieces[x][y]);
+  boardPieces[x][y] = undefined;
+}
 
 export function renderScore() {
-  score1.text = String(score[1]);
-  score2.text = String(score[2]);
+  for(let i = 0; i < 2; i++) {
+    if(scoreBlocks[i] != undefined) {
+      app.stage.removeChild(scoreBlocks[i]);
+      scoreBlocks[i] = undefined;
+    }
+    const scoreText = new PIXI.Text(String(score[i]));
+    let scale = Math.min(scoreMargin / 2, 1.5 * blockSize) / scoreText.height;
+    scoreText.height *= scale;
+    scoreText.width *= scale;
+    scoreText.x = portrait ? width / 2 : i * width + (1 - 2*i) * scoreMargin / 2;
+    scoreText.y = portrait ? (1 - i) * height + (2*i - 1) * scoreMargin / 2 : height / 2;
+    scoreText.rotation = portrait ? i * Math.PI : (0.5 - i) * Math.PI;
+    scoreText.anchor.set(0.5);
+    app.stage.addChild(scoreText);
+    scoreBlocks[i] = scoreText;
+  }
+}
+
+export function renderLoop(delta) {
+  renderToggle(delta);
+  return;
 }

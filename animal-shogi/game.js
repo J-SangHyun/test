@@ -1,10 +1,11 @@
-import { boardSize } from './config.js'
-import * as RENDER from './render.js';
-import { distance } from './utils.js';
+import { renderAction, renderToggleBlock, renderUnToggle, renderEnd, renderScore, renderTurn } from './render.js';
 
-export const board = Array.from(Array(boardSize), () => Array(boardSize));
-export const score = [2, 2];
-export let toggle, player;
+export const boardSize = 7;
+
+export const board = Array.from(Array(boardSize), () => Array(boardSize).fill(0));
+export const score = [0, 2, 2];
+export let toggle = undefined;
+export let turn = 1;
 
 export function initGame() {
   // init board
@@ -13,70 +14,66 @@ export function initGame() {
       board[x][y] = 0;
     }
   }
-
-  // initial pieces
   board[0][0] = board[boardSize-1][boardSize-1] = 1;
   board[0][boardSize-1] = board[boardSize-1][0] = 2;
-  RENDER.addPiece(0, 0, 1);
-  RENDER.addPiece(boardSize-1, boardSize-1, 1);
-  RENDER.addPiece(0, boardSize-1, 2);
-  RENDER.addPiece(boardSize-1, 0, 2);
 
   // init others
-  score[0] = score[1] = 2;
+  score[1] = 2;
+  score[2] = 2;
   toggle = undefined;
-  player = 1;
+  turn = 1;
 }
 
 export function clickBlock(i, j) {
-  let x, y;
-  if(board[i][j] == player) {
+  if(board[i][j] == turn) {
     if(toggle != undefined) {
-      [x, y] = toggle;
-      RENDER.removeToggleBlock(x, y);
+      const x = toggle[0];
+      const y = toggle[1];
+      renderUnToggle(x, y);
     }
     toggle = [i, j];
-    RENDER.renderToggleBlock();
+    renderToggleBlock();
   }
   else if(board[i][j] == 0 && toggle != undefined) {
-    [x, y] = toggle;
+    const x = toggle[0];
+    const y = toggle[1];
     const d = distance(x, y, i, j);
     if(d <= 2) {
-      RENDER.removeToggleBlock(x, y);
+      renderUnToggle(x, y);
       action(x, y, i, j, d);
       toggle = undefined;
     }
   }
 }
 
-
+export function distance(x1, y1, x2, y2) {
+  return Math.max(x1 - x2, x2 - x1, y1 - y2, y2 - y1);
+}
 
 function action(x, y, i, j, d) {
   if(d == 1) {
-    board[i][j] = player;
-    RENDER.addPiece(i, j, player);
+    board[i][j] = turn;
   }
   else if (d == 2) {
     board[x][y] = 0;
-    RENDER.removePiece(x, y);
-    board[i][j] = player;
-    RENDER.addPiece(i, j, player);
+    board[i][j] = turn;
   }
 
   for(let k = Math.max(0, i-1); k < Math.min(boardSize, i+2); k++) {
     for(let l = Math.max(0, j-1); l < Math.min(boardSize, j+2); l++) {
-      if(board[k][l] == 3 - player) {
-        board[k][l] = player;
-        RENDER.removePiece(k, l);
-        RENDER.addPiece(k, l, player);
+      if(board[k][l] != 0) {
+        board[k][l] = turn;
       }
     }
   }
+  renderAction(x, y, i, j, d);
   if(isGameEnd()) {
-    //renderEnd();
+    renderEnd();
   }
   updateScore();
-  changeTurn();
+  renderScore();
+  turn = 3 - turn;
+  renderTurn();
 }
 
 function isGameEnd() {
@@ -85,7 +82,7 @@ function isGameEnd() {
       if(board[i][j] == 0) {
         for(let k = Math.max(0, i-2); k < Math.min(boardSize, i+3); k++) {
           for(let l = Math.max(0, j-2); l < Math.min(boardSize, j+3); l++) {
-            if(board[k][l] == 3 - player) {
+            if(board[k][l] == 3 - turn) {
               return false;
             }
           }
@@ -96,8 +93,7 @@ function isGameEnd() {
   for(let i = 0; i < boardSize; i++) {
     for(let j = 0; j < boardSize; j++) {
       if(board[i][j] == 0) {
-        board[i][j] = player;
-        RENDER.addPiece(i, j, player);
+        board[i][j] = turn;
       }
     }
   }
@@ -105,18 +101,13 @@ function isGameEnd() {
 }
 
 function updateScore() {
-  score[0] = score[1] = 0;
+  score[1] = 0;
+  score[2] = 0;
   for(let i = 0; i < boardSize; i++) {
     for(let j = 0; j < boardSize; j++) {
       if(board[i][j] != 0) {
-        score[board[i][j] - 1]++;
+        score[board[i][j]]++;
       }
     }
   }
-  RENDER.renderScore();
-}
-
-function changeTurn() {
-  player = 3 - player;
-  RENDER.renderTurn();
 }
