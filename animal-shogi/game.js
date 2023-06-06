@@ -1,79 +1,81 @@
-import { renderAction, renderToggleBlock, renderUnToggle, renderEnd, renderScore, renderTurn } from './render.js';
+import { boardShort, boardLong } from './config.js'
+import * as RENDER from './render.js';
+import { distance } from './utils.js';
 
-export const boardSize = 7;
-
-export const board = Array.from(Array(boardSize), () => Array(boardSize).fill(0));
-export const score = [0, 2, 2];
-export let toggle = undefined;
-export let turn = 1;
+export const board = Array.from(Array(boardLong), () => Array(boardShort));
+export let toggle, player;
 
 export function initGame() {
   // init board
-  for(let x = 0; x < boardSize; x++) {
-    for(let y = 0; y < boardSize; y++) {
+  for(let x = 0; x < boardLong; x++) {
+    for(let y = 0; y < boardShort; y++) {
       board[x][y] = 0;
     }
   }
-  board[0][0] = board[boardSize-1][boardSize-1] = 1;
-  board[0][boardSize-1] = board[boardSize-1][0] = 2;
+
+  // initial pieces
+  board[0][0] = 3;
+  board[1][1] = 1;
+  //board[0][boardSize-1] = board[boardSize-1][0] = 2;
+  //RENDER.addPiece(0, 0, 1);
+  //RENDER.addPiece(boardSize-1, boardSize-1, 1);
+  //RENDER.addPiece(0, boardSize-1, 2);
+  //RENDER.addPiece(boardSize-1, 0, 2);
 
   // init others
-  score[1] = 2;
-  score[2] = 2;
   toggle = undefined;
-  turn = 1;
+  player = 1;
 }
 
 export function clickBlock(i, j) {
-  if(board[i][j] == turn) {
+  let x, y;
+  if(board[i][j] == player) {
     if(toggle != undefined) {
-      const x = toggle[0];
-      const y = toggle[1];
-      renderUnToggle(x, y);
+      [x, y] = toggle;
+      RENDER.removeToggleBlock(x, y);
     }
     toggle = [i, j];
-    renderToggleBlock();
+    RENDER.renderToggleBlock();
   }
   else if(board[i][j] == 0 && toggle != undefined) {
-    const x = toggle[0];
-    const y = toggle[1];
+    [x, y] = toggle;
     const d = distance(x, y, i, j);
     if(d <= 2) {
-      renderUnToggle(x, y);
+      RENDER.removeToggleBlock(x, y);
       action(x, y, i, j, d);
       toggle = undefined;
     }
   }
 }
 
-export function distance(x1, y1, x2, y2) {
-  return Math.max(x1 - x2, x2 - x1, y1 - y2, y2 - y1);
-}
+
 
 function action(x, y, i, j, d) {
   if(d == 1) {
-    board[i][j] = turn;
+    board[i][j] = player;
+    RENDER.addPiece(i, j, player);
   }
   else if (d == 2) {
     board[x][y] = 0;
-    board[i][j] = turn;
+    RENDER.removePiece(x, y);
+    board[i][j] = player;
+    RENDER.addPiece(i, j, player);
   }
 
   for(let k = Math.max(0, i-1); k < Math.min(boardSize, i+2); k++) {
     for(let l = Math.max(0, j-1); l < Math.min(boardSize, j+2); l++) {
-      if(board[k][l] != 0) {
-        board[k][l] = turn;
+      if(board[k][l] == 3 - player) {
+        board[k][l] = player;
+        RENDER.removePiece(k, l);
+        RENDER.addPiece(k, l, player);
       }
     }
   }
-  renderAction(x, y, i, j, d);
   if(isGameEnd()) {
-    renderEnd();
+    //renderEnd();
   }
   updateScore();
-  renderScore();
-  turn = 3 - turn;
-  renderTurn();
+  changeTurn();
 }
 
 function isGameEnd() {
@@ -82,7 +84,7 @@ function isGameEnd() {
       if(board[i][j] == 0) {
         for(let k = Math.max(0, i-2); k < Math.min(boardSize, i+3); k++) {
           for(let l = Math.max(0, j-2); l < Math.min(boardSize, j+3); l++) {
-            if(board[k][l] == 3 - turn) {
+            if(board[k][l] == 3 - player) {
               return false;
             }
           }
@@ -93,7 +95,8 @@ function isGameEnd() {
   for(let i = 0; i < boardSize; i++) {
     for(let j = 0; j < boardSize; j++) {
       if(board[i][j] == 0) {
-        board[i][j] = turn;
+        board[i][j] = player;
+        RENDER.addPiece(i, j, player);
       }
     }
   }
@@ -101,13 +104,18 @@ function isGameEnd() {
 }
 
 function updateScore() {
-  score[1] = 0;
-  score[2] = 0;
+  score[0] = score[1] = 0;
   for(let i = 0; i < boardSize; i++) {
     for(let j = 0; j < boardSize; j++) {
       if(board[i][j] != 0) {
-        score[board[i][j]]++;
+        score[board[i][j] - 1]++;
       }
     }
   }
+  RENDER.renderScore();
+}
+
+function changeTurn() {
+  player = 3 - player;
+  RENDER.renderTurn();
 }
