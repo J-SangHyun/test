@@ -53,7 +53,7 @@ function calcRenderVariables() {
   portrait = height >= width;
   const short = portrait ? width : height;
   const long = portrait ? height : width;
-  blockSize = Math.min(short / (boardShort + 1), long / (boardLong + 4));
+  blockSize = Math.min(short / (boardShort + 1), long / (boardLong + 3));
   boardRenderShort = short * (boardShort + 1);
   boardRenderLong = long * (boardLong + 1);
   catchMargin = 1;
