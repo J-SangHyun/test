@@ -88,7 +88,7 @@ function renderBoard() {
       newBlock.drawRect(0, 0, blockSize, blockSize);
       newBlock.endFill();
       newBlock.x = boardxPad + (portrait ? j : i) * blockSize;
-      newBlock.y = boardyPad + (portrait ? i : j) * blockSize;
+      newBlock.y = boardyPad + (portrait ? boardLong - i - 1 : j) * blockSize;
       newBlock.eventMode = 'static';
       newBlock.on('pointerdown', (event) => { clickBlock(i, j); });
       app.stage.addChild(newBlock);
@@ -147,13 +147,13 @@ export function removeToggleBlock(x, y) {
 }
 
 export function addPiece(x, y, piece) {
-  const turn = (piece - 1) % 5 + 1;
-  const type = (piece - 1) - (turn - 1) * 5;
+  const type = (piece - 1) % 5;
+  const turn = (piece - 1 - type) / 5 + 1;
   const newPiece = new PIXI.Sprite(pieceTexture[type]);
   newPiece.width = pieceSize;
   newPiece.height = pieceSize;
-  newPiece.x = boardxPad + ((portrait ? x : y) + 0.5) * blockSize;
-  newPiece.y = boardyPad + ((portrait ? boardLong - y - 1 : x) + 0.5) * blockSize;
+  newPiece.x = boardxPad + ((portrait ? y : x) + 0.5) * blockSize;
+  newPiece.y = boardyPad + ((portrait ? boardLong - x - 1 : y) + 0.5) * blockSize;
   newPiece.anchor.set(0.5);
   newPiece.rotation = portrait ? (turn - 1) * Math.PI : (1.5 - turn) * Math.PI;
   app.stage.addChild(newPiece);

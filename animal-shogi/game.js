@@ -15,7 +15,14 @@ export function initGame() {
 
   // initial pieces
   board[0][0] = 3;
+  board[0][1] = 5;
+  board[0][2] = 4;
   board[1][1] = 1;
+
+  board[2][1] = 5 + 1;
+  board[3][0] = 5 + 4;
+  board[3][1] = 5 + 5;
+  board[3][2] = 5 + 3;
   //board[0][boardSize-1] = board[boardSize-1][0] = 2;
   //RENDER.addPiece(0, 0, 1);
   //RENDER.addPiece(boardSize-1, boardSize-1, 1);
@@ -29,6 +36,7 @@ export function initGame() {
 
 export function clickBlock(i, j) {
   let x, y;
+  console.log(i, j);
   if(board[i][j] == player) {
     if(toggle != undefined) {
       [x, y] = toggle;
@@ -47,8 +55,6 @@ export function clickBlock(i, j) {
     }
   }
 }
-
-
 
 function action(x, y, i, j, d) {
   if(d == 1) {
