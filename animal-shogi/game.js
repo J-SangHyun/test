@@ -1,4 +1,4 @@
-import { boardShort, boardLong } from './config.js'
+import { boardShort, boardLong, PIECE } from './config.js'
 import * as RENDER from './render.js';
 import { distance } from './utils.js';
 
@@ -14,15 +14,15 @@ export function initGame() {
   }
 
   // initial pieces
-  board[0][0] = 3;
-  board[0][1] = 5;
-  board[0][2] = 4;
-  board[1][1] = 1;
+  board[0][0] = turnAndPiece(1, PIECE.ELEPHANT);
+  board[0][1] = turnAndPiece(1, PIECE.LION);
+  board[0][2] = turnAndPiece(1, PIECE.GIRAFFE);
+  board[1][1] = turnAndPiece(1, PIECE.CHICK);
 
-  board[2][1] = 5 + 1;
-  board[3][0] = 5 + 4;
-  board[3][1] = 5 + 5;
-  board[3][2] = 5 + 3;
+  board[2][1] = turnAndPiece(2, PIECE.CHICK);
+  board[3][0] = turnAndPiece(2, PIECE.GIRAFFE);
+  board[3][1] = turnAndPiece(2, PIECE.LION);
+  board[3][2] = turnAndPiece(2, PIECE.ELEPHANT);
   //board[0][boardSize-1] = board[boardSize-1][0] = 2;
   //RENDER.addPiece(0, 0, 1);
   //RENDER.addPiece(boardSize-1, boardSize-1, 1);
@@ -124,4 +124,8 @@ function updateScore() {
 function changeTurn() {
   player = 3 - player;
   RENDER.renderTurn();
+}
+
+function turnAndPiece(turn, piece) {
+  return (turn - 1) * 5 + piece;
 }

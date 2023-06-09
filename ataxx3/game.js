@@ -17,10 +17,10 @@ export function initGame() {
   // initial pieces
   board[0][0] = board[boardSize-1][boardSize-1] = 1;
   board[0][boardSize-1] = board[boardSize-1][0] = 2;
-  RENDER.addPiece(0, 0, 1);
-  RENDER.addPiece(boardSize-1, boardSize-1, 1);
-  RENDER.addPiece(0, boardSize-1, 2);
-  RENDER.addPiece(boardSize-1, 0, 2);
+  //RENDER.addPiece(0, 0, 1);
+  //RENDER.addPiece(boardSize-1, boardSize-1, 1);
+  //RENDER.addPiece(0, boardSize-1, 2);
+  //RENDER.addPiece(boardSize-1, 0, 2);
 
   // init others
   score[0] = score[1] = 2;

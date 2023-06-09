@@ -115,7 +115,7 @@ export function renderToggleBlock() {
   if(toggle != undefined) {
     let x, y, d;
     [x, y] = toggle;
-    for(let i = Math.max(0, x-2); i < Math.min(boardSize, x+3); i++) {
+    for(let i = Math.max(0, x-1); i < Math.min(boardSize, x+2); i++) {
       for(let j = Math.max(0, y-2); j < Math.min(boardSize, y+3); j++) {
         d = distance(x, y, i, j);
         if(board[i][j] == 0 && d != 0) {
