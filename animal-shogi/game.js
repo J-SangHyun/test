@@ -3,6 +3,7 @@ import * as RENDER from './render.js';
 import { distance } from './utils.js';
 
 export const board = Array.from(Array(boardLong), () => Array(boardShort));
+export const catchBoard = Array.from(Array(4), () => Array(3));
 export let toggle, player;
 
 export function initGame() {
@@ -10,6 +11,11 @@ export function initGame() {
   for(let x = 0; x < boardLong; x++) {
     for(let y = 0; y < boardShort; y++) {
       board[x][y] = 0;
+    }
+  }
+  for(let x = 0; x < 4; x++) {
+    for(let y = 0; y < 3; y++) {
+      catchBoard[x][y] = 0;
     }
   }
 
@@ -34,15 +40,16 @@ export function initGame() {
   player = 1;
 }
 
-export function clickBlock(i, j) {
+export function clickBlock(i, j, boardType) {
   let x, y;
   console.log(i, j);
+  if(boardType == 1)
   if(board[i][j] == player) {
     if(toggle != undefined) {
-      [x, y] = toggle;
+      [x, y, boardType] = toggle;
       RENDER.removeToggleBlock(x, y);
     }
-    toggle = [i, j];
+    toggle = [i, j, boardType];
     RENDER.renderToggleBlock();
   }
   else if(board[i][j] == 0 && toggle != undefined) {

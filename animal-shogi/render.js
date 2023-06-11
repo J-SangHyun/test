@@ -1,14 +1,16 @@
 import { app, width, height } from './main.js';
 import { boardShort, boardLong, toggleColor } from './config.js';
-import { board, player, toggle, clickBlock } from './game.js';
+import { board, catchBoard, player, toggle, clickBlock } from './game.js';
 import { distance } from './utils.js';
 
 let boardBlocks, boardPieces, boardToggle;
-let turnBlocks, scoreBlocks;
+let boardCatchToggles, boardCatchPieces;
+let turnBlocks;
 
 let pieceTexture;
 
-let portrait, catchMargin, boardRenderShort, boardRenderLong, blockSize, pieceSize;
+let portrait, catchMargin, boardRenderShort, boardRenderLong;
+let blockSize, pieceSize, catchPieceSize;
 let boardxPad, boardyPad;
 
 
@@ -23,10 +25,8 @@ export function loadTextures() {
 export function initRender() {
   boardBlocks = Array.from(Array(boardLong), () => Array(boardShort).fill(undefined));
   boardPieces = Array.from(Array(boardLong), () => Array(boardShort).fill(undefined));
-  //boardCatchBlocks1 = Array.from(Array(2), () => Array(boardWidth).fill(undefined));
-  //boardCatchBlocks2 = Array.from(Array(2), () => Array(boardWidth).fill(undefined));
-  //boardCatchPieces1 = Array.from(Array(2), () => Array(boardWidth).fill(undefined));
-  //boardCatchPieces2 = Array.from(Array(2), () => Array(boardWidth).fill(undefined));
+  boardCatchToggles = Array.from(Array(4), () => Array(3).fill(undefined));
+  boardCatchPieces = Array.from(Array(4), () => Array(3).fill(undefined));
   boardToggle = Array.from(Array(boardLong), () => Array(boardShort).fill(undefined));
   turnBlocks = [undefined, undefined];
 }
@@ -56,8 +56,9 @@ function calcRenderVariables() {
   blockSize = Math.min(short / (boardShort + 1), long / (boardLong + 3));
   boardRenderShort = short * (boardShort + 1);
   boardRenderLong = long * (boardLong + 1);
-  catchMargin = 1;
+  catchMargin = blockSize * 1.5;
   pieceSize = 0.8 * blockSize;
+  catchPieceSize
   boardxPad = width / 2 - blockSize * (portrait ? boardShort : boardLong) / 2;
   boardyPad = height / 2 - blockSize * (portrait ? boardLong : boardShort) / 2;
 }
@@ -90,7 +91,7 @@ function renderBoard() {
       newBlock.x = boardxPad + (portrait ? j : i) * blockSize;
       newBlock.y = boardyPad + (portrait ? boardLong - i - 1 : j) * blockSize;
       newBlock.eventMode = 'static';
-      newBlock.on('pointerdown', (event) => { clickBlock(i, j); });
+      newBlock.on('pointerdown', (event) => { clickBlock(i, j, 1); });
       app.stage.addChild(newBlock);
       boardBlocks[i][j] = newBlock;
     }
@@ -108,7 +109,29 @@ function renderPieces() {
 }
 
 function renderCatchPieces() {
-  return;
+  for(let i = 0; i < 4; i++) {
+    for(let j = 0; j < 3; j++) {
+      if(catchBoard[i][j] != 0) {
+        addCatchPiece(i, j, catchBoard[i][j]);
+      }
+    }
+  }
+}
+
+function addCatchPiece(i, j, piece) {
+  if(i < 2) {  // player 1
+    const type = (piece - 1) % 5;
+    const turn = (piece - 1 - type) / 5 + 1;
+    const newPiece = new PIXI.Sprite(pieceTexture[type]);
+    newPiece.width = pieceSize;
+    newPiece.height = pieceSize;
+    newPiece.x = boardxPad + ((portrait ? y : x) + 0.5) * blockSize;
+    newPiece.y = boardyPad + ((portrait ? boardLong - x - 1 : y) + 0.5) * blockSize;
+    newPiece.anchor.set(0.5);
+    newPiece.rotation = portrait ? (turn - 1) * Math.PI : (1.5 - turn) * Math.PI;
+    app.stage.addChild(newPiece);
+    boardPieces[x][y] = newPiece;
+  }
 }
 
 export function renderToggleBlock() {
